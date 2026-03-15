@@ -1,0 +1,2 @@
+flet==0.82.2
+matplotlib>=3.8.0
