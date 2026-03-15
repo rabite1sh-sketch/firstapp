@@ -78,6 +78,6 @@ class StatsView(ft.Column):
         self._chart_image.src = chart_path or ""
         self._chart_image.visible = bool(chart_path)
 
-        wordcloud_path = self._stats_service.generate_memo_wordcloud()
-        self._wordcloud_image.src = wordcloud_path or ""
-        self._wordcloud_image.visible = bool(wordcloud_path)
+        wordcloud_url = self._stats_service.generate_wordcloud_url()
+        self._wordcloud_image.src = wordcloud_url or ""
+        self._wordcloud_image.visible = bool(wordcloud_url)

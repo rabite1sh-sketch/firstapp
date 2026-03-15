@@ -62,6 +62,6 @@ python -m comiclog.main
   - 명장면 필터링 및 작품별 그룹 조회 담당
 - `services/stats_service.py`
   - 총 읽은 화, 메모 수, 작품별 기록 집계
-  - matplotlib/wordcloud 기반 이미지 생성
+  - matplotlib 차트 + QuickChart 워드클라우드 URL 생성
 - `ui/*_view.py`
   - 각 탭/화면을 독립 뷰로 분리해 확장 가능한 구조 유지
