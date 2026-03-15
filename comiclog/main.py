@@ -29,10 +29,14 @@ def main(page: ft.Page) -> None:
     database = Database(db_path)
     database.initialize()
 
-    # 탭/화면에서 재사용할 서비스
     work_service = WorkService(db_path)
     highlight_service = HighlightService(db_path)
     stats_service = StatsService(db_path)
+
+    # 앱 첫 실행 체험을 위한 샘플 작품 데이터
+    if not work_service.get_works():
+        work_service.add_work(title="샘플 작품 A", author="작가 미정", description="플랫폼: Sample")
+        work_service.add_work(title="샘플 작품 B", author="작가 미정", description="플랫폼: Sample")
 
     content = ft.Container(expand=True, padding=16)
 
@@ -55,21 +59,17 @@ def main(page: ft.Page) -> None:
     )
 
     def render_home() -> None:
-        """Home 탭 화면 렌더링."""
         home_view = HomeView(stats_service=stats_service)
         home_view.reload()
         content.content = home_view
+        page.update()
 
     def render_works(route: str) -> None:
-        """Works 탭의 목록/추가/상세 화면 렌더링."""
         parts = route.strip("/").split("/")
 
         if route == "/works/new":
-            content.content = AddWorkView(
-                page=page,
-                work_service=work_service,
-                on_work_added=lambda: None,
-            )
+            content.content = AddWorkView(page=page, work_service=work_service)
+            page.update()
             return
 
         if len(parts) == 2 and parts[0] == "works" and parts[1].isdigit():
@@ -79,6 +79,7 @@ def main(page: ft.Page) -> None:
                 work_service=work_service,
                 db_path=db_path,
             )
+            page.update()
             return
 
         work_list = WorkListView(
@@ -87,40 +88,33 @@ def main(page: ft.Page) -> None:
             on_add_work=lambda: page.go("/works/new"),
         )
         content.content = work_list
-
-        # 요구사항: WorkListView 생성 후 reload_works() 호출 + page.update()
+        # 요구사항: 컨트롤 추가 이후 목록 로드
         work_list.reload_works()
         page.update()
 
     def render_highlights() -> None:
-        """Highlights 탭 화면 렌더링."""
         highlight_view = HighlightView(page=page, highlight_service=highlight_service)
-        highlight_view.reload()
         content.content = highlight_view
+        highlight_view.reload()
+        page.update()
 
     def render_stats() -> None:
-        """Stats 탭 화면 렌더링."""
         stats_view = StatsView(page=page, stats_service=stats_service)
-        stats_view.reload()
         content.content = stats_view
+        stats_view.reload()
+        page.update()
 
     def render_from_state() -> None:
-        """현재 탭/라우트 상태 기준으로 본문 화면 갱신."""
         if navigation.selected_index == TAB_HOME:
             render_home()
         elif navigation.selected_index == TAB_WORKS:
             render_works(page.route or "/works")
-            return
         elif navigation.selected_index == TAB_HIGHLIGHTS:
             render_highlights()
         else:
             render_stats()
 
-        # 탭 컨트롤 구성 후 업데이트는 한 번만 호출
-        page.update()
-
     def on_nav_change(_: ft.ControlEvent) -> None:
-        """하단 탭 선택 변경 처리."""
         if navigation.selected_index == TAB_HOME:
             page.go("/")
         elif navigation.selected_index == TAB_WORKS:
@@ -131,7 +125,6 @@ def main(page: ft.Page) -> None:
             page.go("/stats")
 
     def on_route_change(_: ft.RouteChangeEvent) -> None:
-        """라우트 변경 시 탭 선택값과 렌더링 상태 동기화."""
         route = page.route or "/"
         if route.startswith("/works"):
             navigation.selected_index = TAB_WORKS

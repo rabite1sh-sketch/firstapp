@@ -50,4 +50,3 @@ class HomeView(ft.Column):
                 ],
             ),
         )
-        self.update()
