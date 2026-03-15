@@ -9,7 +9,7 @@ class HighlightView(ft.Column):
     """명장면 아카이브 화면(작품별 그룹 + 카드 UI)."""
 
     def __init__(self, page: ft.Page, highlight_service: HighlightService) -> None:
-        """페이지와 서비스 객체를 주입받아 명장면 목록 화면을 초기화합니다."""
+        """컨트롤만 구성하고 데이터 로딩은 외부(main.py)에서 호출합니다."""
         super().__init__(expand=True, spacing=12)
         self._page = page
         self._highlight_service = highlight_service
@@ -27,11 +27,10 @@ class HighlightView(ft.Column):
             self._list,
         ]
 
-        self.reload()
-
     def _on_refresh(self, _: ft.ControlEvent) -> None:
         """새로고침 버튼 이벤트: 데이터를 다시 조회합니다."""
         self.reload()
+        self._page.update()
 
     def reload(self) -> None:
         """서비스에서 명장면 데이터를 가져와 카드 형태로 렌더링합니다."""
@@ -39,22 +38,13 @@ class HighlightView(ft.Column):
 
         if not grouped:
             self._list.controls = [
-                ft.Card(
-                    content=ft.Container(
-                        padding=14,
-                        content=ft.Text("아직 등록된 명장면이 없습니다."),
-                    )
-                )
+                ft.Card(content=ft.Container(padding=14, content=ft.Text("아직 등록된 명장면이 없습니다.")))
             ]
-            self.update()
             return
 
         cards: list[ft.Control] = []
         for work_title, highlights in grouped.items():
-            # 작품별 섹션 카드
-            section_items: list[ft.Control] = [
-                ft.Text(work_title, size=18, weight=ft.FontWeight.W_600)
-            ]
+            section_items: list[ft.Control] = [ft.Text(work_title, size=18, weight=ft.FontWeight.W_600)]
 
             for item in highlights:
                 section_items.append(
@@ -92,4 +82,3 @@ class HighlightView(ft.Column):
             )
 
         self._list.controls = cards
-        self.update()
