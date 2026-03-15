@@ -1,0 +1,1 @@
+"""ComicLog application package."""
