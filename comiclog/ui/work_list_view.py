@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import flet as ft
+from typing import Callable
 
 from comiclog.services.work_service import WorkService
 
@@ -12,11 +13,13 @@ class WorkListView(ft.Column):
         self,
         page: ft.Page,
         work_service: WorkService,
+        on_add_work: Callable[[], None] | None = None,
     ) -> None:
         """페이지 인스턴스와 작품 서비스 객체를 받아 목록 화면을 초기화합니다."""
         super().__init__(expand=True, spacing=12)
         self._page = page
         self._work_service = work_service
+        self._on_add_work = on_add_work
 
         # 작품 목록이 렌더링될 리스트 영역입니다.
         self._work_list = ft.ListView(expand=True, spacing=10)
@@ -87,8 +90,12 @@ class WorkListView(ft.Column):
         self.update()
 
     def _on_add_work_click(self, _: ft.ControlEvent) -> None:
-        """작품 추가 버튼 클릭 시 샘플 작품을 생성하고 목록을 갱신합니다."""
-        # 초기 단계에서는 빠른 동작 확인을 위해 샘플 레코드를 생성합니다.
+        """작품 추가 버튼 클릭 이벤트를 처리합니다."""
+        if self._on_add_work is not None:
+            self._on_add_work()
+            return
+
+        # 콜백이 없으면 기본 동작으로 샘플 작품을 생성합니다.
         count = len(self._work_service.get_works()) + 1
         self._work_service.add_work(
             title=f"새 작품 {count}",
